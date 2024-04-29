@@ -1,0 +1,43 @@
+﻿@model IEnumerable<DogRallyMVC.Models.TrackDTO>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Alle ringormbaner</h1>
+
+<p>
+    <a asp-action="Create2">Opret Ringormbane</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TrackName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrackDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TrackName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TrackDate)
+                </td>
+                <td>
+                    <a asp-action="ViewCourse" asp-route-id="@item.TrackID">View Course</a> |
+                    <a asp-action="Edit" asp-route-id="@item.TrackID">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.TrackID">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.TrackID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
