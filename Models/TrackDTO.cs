@@ -11,7 +11,7 @@ namespace DogRallyMVC.Models
 
         [JsonPropertyName("trackID")]
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Track ID must be greater than 0")]
+        [Range(0, int.MaxValue, ErrorMessage = "Track ID must be 0")]
         public int TrackID { get; set; }
 
         [JsonPropertyName("trackName")]

@@ -1,0 +1,230 @@
+﻿@model DogRallyMVC.Models.TrackExerciseViewModelDTO
+
+@{
+    ViewData["Title"] = "CreateTrack";
+}
+<style>
+    #canvas-container {
+        position: relative;
+    }
+
+    #dogTrainingCanvas {
+        /* background-image: url('/images/CourseBackground.png'); */
+        background-size: 100% 100%;
+    }
+</style>
+
+<h1>Ringormbane</h1>
+<h1>@ViewBag.Tonni</h1>
+
+
+<hr />
+<!-- Display Success or Error Messages -->
+@if (ViewBag.SuccessMessage != null)
+{
+    <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+}
+@if (ViewBag.ApiResponse != null)
+{
+    <div class="alert alert-danger">@ViewBag.ApiResponse</div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var key in ViewData.ModelState.Keys)
+            {
+                @foreach (var error in ViewData.ModelState[key].Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var key in ViewData.ModelState.Keys)
+            {
+                @foreach (var error in ViewData.ModelState[key].Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+<div id="canvas-container">
+    <canvas id="dogTrainingCanvas" width="1295" height="600"></canvas>
+    <!-- Indsæt din canvas kode her -->
+</div>
+
+@* Exercises *@
+
+<script>
+    
+    @* Omdan Model.Exercises til et JSON-objekt *@
+        var exercises = @Html.Raw(Json.Serialize(Model.Exercises.Select(e => new
+        {
+            e.ExerciseID,
+            x = e.PositionX,
+            y = e.PositionY,
+            illustrationPath = e.ExerciseIllustrationPath
+        })));
+
+    var canvas = document.getElementById('dogTrainingCanvas');
+    var ctx = canvas.getContext('2d');
+
+    exercises.forEach(function (exercise) {
+        var img = new Image();
+        img.onload = function () {
+            console.log("Indlæst billede for øvelse: ", exercise.ExerciseID); // Rettede 'exercises.name' til 'exercise.navn'
+            exercise.image = img;
+            drawExercise(exercise);
+        };
+        img.onerror = function () {
+            console.error("Kunne ikke indlæse billede: ", exercise.illustrationPath); // Rettede 'exercises.IllustrationPath' til 'exercise.IllustrationPath'
+        };
+        img.src = exercise.illustrationPath; // Rettede 'exercises.IllustrationPath' til 'exercise.IllustrationPath'
+    });
+
+    function drawExercise(exercise) {
+        ctx.drawImage(exercise.image, exercise.x, exercise.y, 50, 50); // Rettede 'PositionX' og 'PositionY' til 'x' og 'y'
+    }
+
+    var draggedExercise = null;
+
+    canvas.addEventListener('mousedown', function (e) {
+        exercises.forEach(function (exercise) {
+            if (e.offsetX >= exercise.x && e.offsetX <= exercise.x + 50 && e.offsetY >= exercise.y && e.offsetY <= exercise.y + 50) { // Rettede 'PositionX' og 'PositionY' til 'x' og 'y'
+                draggedExercise = exercise;
+                draggedExercise = Object.assign({}, exercise); // Kopier det trukne objekt
+            }
+        });
+    });
+
+    var draggedExerciseX = 0; // Global variabel til at holde x værdien
+    var draggedExerciseY = 0; // Global variabel til at holde y værdien
+
+    canvas.addEventListener('mousemove', function (e) {
+        if (draggedExercise) {
+            draggedExercise.x = e.offsetX - 25; // Centrer musen på billedet
+            draggedExercise.y = e.offsetY - 25;
+            // Opdater input felter med de nye x og y værdier
+            document.getElementById('draggedExerciseX').value = draggedExercise.x;
+            document.getElementById('draggedExerciseY').value = draggedExercise.y;
+            redrawCanvas(); // Rens og tegn alle øvelserne igen
+        }
+    });
+
+
+    
+  
+
+
+    canvas.addEventListener('mouseup', function () {
+        if (draggedExercise) {
+            exercises.push(draggedExercise); // Tilføj den kopierede øvelse til listen
+            draggedExercise = null;
+            redrawCanvas();
+            // updateFormFields(); // Opdater input felterne med de seneste x og y værdier
+        }
+    });
+
+
+    function redrawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Rens canvas
+        exercises.forEach(drawExercise); // Tegn alle øvelser igen
+    }
+</script>
+
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreateTrack">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Inputfelter til bane -->
+            <div class="form-group">
+                <label asp-for="@Model.Track.TrackName" class="control-label"></label>
+                <input asp-for="@Model.Track.TrackName" class="form-control" />
+                <span asp-validation-for="@Model.Track.TrackName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.Track.TrackDate" class="control-label"></label>
+                <input asp-for="@Model.Track.TrackDate" class="form-control" />
+                <span asp-validation-for="@Model.Track.TrackDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.Track.TrackID" class="control-label"></label>
+                <input asp-for="@Model.Track.TrackID" class="form-control" />
+                <span asp-validation-for="@Model.Track.TrackID" class="text-danger"></span>
+            </div>
+
+
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @for (int i = 0; i < Model.Exercises.Count; i++)
+            {
+                <div class="form-group">
+                    <input type="hidden" asp-for="@Model.Exercises[i].ExerciseID" />
+                    <div class="form-group">
+                        <label asp-for="@Model.Exercises[i].PositionX" class="control-label"></label>
+                        <input asp-for="@Model.Exercises[i].PositionX" class="form-control" />
+                        <span asp-validation-for="@Model.Exercises[i].PositionX" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.Exercises[i].PositionY" class="control-label"></label>
+                        <input asp-for="@Model.Exercises[i].PositionY" class="form-control" />
+                        <span asp-validation-for="@Model.Exercises[i].PositionY" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.Exercises[i].ExerciseIllustrationPath" class="control-label"></label>
+                        <input asp-for="@Model.Exercises[i].ExerciseIllustrationPath" class="form-control" />
+                        <span asp-validation-for="@Model.Exercises[i].ExerciseIllustrationPath" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+
+            <form id="exerciseForm">
+                <label for="exerciseX">X Position:</label>
+                <input type="text" id="draggedExerciseX" name="draggedExerciseX" value="">
+                <label for="exerciseY">Y Position:</label>
+                <input type="text" id="draggedExerciseY" name="draggedExerciseY" value="">
+                <!-- Andre form elementer og submit knap her -->
+            </form>
+
+
+
+
+
+
+
+            <!-- Submit-knap -->
+            <div class="form-group">
+                <input type="submit" value="Opret svinet" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
