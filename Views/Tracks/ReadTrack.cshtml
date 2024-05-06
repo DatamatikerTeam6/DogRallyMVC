@@ -1,0 +1,68 @@
+﻿@model IEnumerable<DogRallyMVC.Models.TrackExerciseDTO>
+
+
+
+@{
+    ViewData["Title"] = "ReadTrack";
+}
+<style>
+    #canvas-container {
+        position: relative;
+    }
+
+    #dogTrainingCanvas {
+        background-image: url('/images/Blackbitch.png');
+        background-size: cover;
+        width: 1295px; /* Juster størrelsen efter dine behov */
+        height: 600px; /* Juster størrelsen efter dine behov */
+    }
+</style>
+
+<h1>Ringormbane</h1>
+
+<hr />
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var key in ViewData.ModelState.Keys)
+            {
+                @foreach (var error in ViewData.ModelState[key].Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+@foreach (var trackExercise in Model)
+{
+    <h1>@trackExercise.TrackID</h1>
+    <h1>@trackExercise.TrackExercisePositionX</h1>
+    <h1>@trackExercise.TrackExercisePositionY</h1>
+}
+
+<div id="canvas-container">
+    <canvas id="dogTrainingCanvas" width="1295" height="600"></canvas>
+    <!-- Indsæt din canvas kode her -->
+</div>
+
+@* Exercises *@
+
+
+
+
+
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
